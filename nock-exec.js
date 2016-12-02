@@ -50,6 +50,7 @@ function ProcessMock(command) {
     this._callback = undefined;
     this.stdout = new DirectDuplex();
     this.stderr = new DirectDuplex();
+    this.execErr = new DirectDuplex();
     this.stdin = new DirectDuplex();
 }
 
@@ -79,6 +80,14 @@ ProcessMock.prototype._run = function(options, callback) {
                         self.stderr.write(action.arg);
                     }
                     break;
+                case 'execErr':
+                    if (typeof action.arg === 'function') {
+                        action.arg(self.execErr);
+                    }
+                    else if (typeof action.arg === 'string') {
+                        self.execErr.write(action.arg);
+                    }
+                    break;
                 case 'exit':
                     self._exited = true;
                     self.emit('exit', action.arg);
@@ -88,7 +97,8 @@ ProcessMock.prototype._run = function(options, callback) {
         if (typeof callback === 'function') {
             var out = self.stdout.cache();
             var err = self.stderr.cache();
-            callback(null, out, err);
+            var execErr = self.execErr.cache() == '' ? null : self.execErr.cache();
+            callback(execErr, out, err);
         }
     }.bind(this));
     return this;
@@ -112,6 +122,11 @@ ProcessMock.prototype.outputLine = function(output) {
 
 ProcessMock.prototype.err = function(output) {
     this._actions.push({op: 'err', arg: output});
+    return this;
+};
+
+ProcessMock.prototype.execerror = function(output) {
+    this._actions.push({op: 'execErr', arg: output});
     return this;
 };
 
