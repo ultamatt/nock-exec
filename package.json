@@ -1,6 +1,6 @@
 {
   "name": "nock-exec",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "NodeJS mock module around the child_process.exec function inspired by nock.",
   "main": "./nock-exec.js",
   "author": "Vladimir Clausse",
